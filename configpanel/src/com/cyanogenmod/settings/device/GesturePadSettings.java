@@ -16,6 +16,7 @@
 
 package com.cyanogenmod.settings.device;
 
+import com.android.internal.util.cm.ScreenType;
 import com.cyanogenmod.settings.device.utils.Constants;
 import com.cyanogenmod.settings.device.utils.NodePreferenceActivity;
 
