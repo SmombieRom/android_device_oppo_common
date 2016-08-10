@@ -22,8 +22,6 @@ import android.preference.SwitchPreference;
 
 import com.android.internal.util.cm.ScreenType;
 
-import cyanogenmod.providers.CMSettings;
-
 import com.cyanogenmod.settings.device.utils.NodePreferenceActivity;
 
 public class TouchscreenGestureSettings extends NodePreferenceActivity {
