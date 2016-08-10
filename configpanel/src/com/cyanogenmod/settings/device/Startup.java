@@ -43,7 +43,6 @@ import android.view.KeyEvent;
 import java.io.File;
 
 import com.cyanogenmod.settings.device.utils.Constants;
-
 import com.cyanogenmod.settings.device.utils.FileUtils;
 
 public class Startup extends BroadcastReceiver {
@@ -52,17 +51,17 @@ public class Startup extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        final String action = intent.getAction();
-        if (cyanogenmod.content.Intent.ACTION_INITIALIZE_CM_HARDWARE.equals(action)) {
+        if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             // Disable touchscreen gesture settings if needed
             if (!hasTouchscreenGestures()) {
                 disableComponent(context, TouchscreenGestureSettings.class.getName());
             } else {
                 enableComponent(context, TouchscreenGestureSettings.class.getName());
                 // Restore nodes to saved preference values
-                for (String pref : Constants.sGesturePrefKeys) {
-                    boolean value = Constants.isPreferenceEnabled(context, pref);
-                    String node = Constants.sBooleanNodePreferenceMap.get(pref);
+                for (String pref : Constants.sNodePreferenceMap.keySet()) {
+                    boolean defaultValue = Constants.sNodeDefaultMap.get(pref);
+                    boolean value = Constants.isPreferenceEnabled(context, pref, defaultValue);
+                    String node = Constants.sNodePreferenceMap.get(pref);
                     if (!FileUtils.writeLine(node, value ? "1" : "0")) {
                         Log.w(TAG, "Write to node " + node +
                             " failed while restoring saved preference values");
@@ -78,47 +77,13 @@ public class Startup extends BroadcastReceiver {
                 IBinder b = ServiceManager.getService("gesture");
                 IGestureService sInstance = IGestureService.Stub.asInterface(b);
 
-                boolean value = Constants.isPreferenceEnabled(context,
-                        Constants.TOUCHPAD_STATE_KEY);
-                String node = Constants.sBooleanNodePreferenceMap.get(
-                        Constants.TOUCHPAD_STATE_KEY);
-                if (!FileUtils.writeLine(node, value ? "1" : "0")) {
-                    Log.w(TAG, "Write to node " + node +
-                            " failed while restoring touchpad enable state");
-                }
-
                 // Set longPress event
                 toggleLongPress(context, sInstance, Constants.isPreferenceEnabled(
-                        context, Constants.TOUCHPAD_LONGPRESS_KEY));
+                        context, Constants.TOUCHPAD_LONGPRESS_KEY, false));
 
                 // Set doubleTap event
-                toggleDoubleTap(context, sInstance, Constants.isPreferenceEnabled(
-                        context, Constants.TOUCHPAD_DOUBLETAP_KEY));
-            }
-
-            // Disable button settings if needed
-            if (!hasButtonProcs()) {
-                disableComponent(context, ButtonSettings.class.getName());
-            } else {
-                enableComponent(context, ButtonSettings.class.getName());
-
-                // Restore nodes to saved preference values
-                for (String pref : Constants.sButtonPrefKeys) {
-                    String value;
-                    String node;
-                    if (Constants.sStringNodePreferenceMap.containsKey(pref)) {
-                        value = Constants.getPreferenceString(context, pref);
-                        node = Constants.sStringNodePreferenceMap.get(pref);
-                    } else {
-                        value = Constants.isPreferenceEnabled(context, pref) ?
-                                "1" : "0";
-                        node = Constants.sBooleanNodePreferenceMap.get(pref);
-                    }
-                    if (!FileUtils.writeLine(node, value)) {
-                        Log.w(TAG, "Write to node " + node +
-                            " failed while restoring saved preference values");
-                    }
-                }
+                toggleLongPress(context, sInstance, Constants.isPreferenceEnabled(
+                        context, Constants.TOUCHPAD_DOUBLETAP_KEY, false));
             }
 
             // Disable O-Click settings if needed
@@ -184,13 +149,6 @@ public class Startup extends BroadcastReceiver {
         return new File(Constants.TOUCHSCREEN_CAMERA_NODE).exists() &&
             new File(Constants.TOUCHSCREEN_MUSIC_NODE).exists() &&
             new File(Constants.TOUCHSCREEN_FLASHLIGHT_NODE).exists();
-    }
-
-    private boolean hasButtonProcs() {
-        return (new File(Constants.NOTIF_SLIDER_TOP_NODE).exists() &&
-            new File(Constants.NOTIF_SLIDER_MIDDLE_NODE).exists() &&
-            new File(Constants.NOTIF_SLIDER_BOTTOM_NODE).exists()) ||
-            new File(Constants.BUTTON_SWAP_NODE).exists();
     }
 
     private void disableComponent(Context context, String component) {
