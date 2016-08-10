@@ -26,6 +26,8 @@
     <string name="touchpad_double_tap_summary">While in camera, double tap to capture image</string>
 
     <!-- Gesture shortcuts -->
+    <string name="screen_gestures_panel_title">S-O-G</string>
+    
     <string name="touchscreen_camera_gesture_title">Camera</string>
     <string name="touchscreen_camera_gesture_summary">Draw a circle to activate camera</string>
     <string name="touchscreen_music_gesture_title">Music</string>
