@@ -15,5 +15,9 @@
      limitations under the License.
 -->
 <resources>
-  <style name="Theme.ActionBar.SubSettings" parent="@android:style/Widget.Material.ActionBar">
+    <style name="Theme.Main" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
+    </style>
+
+    <style name="Theme.ActionBar.SubSettings" parent="@android:style/Widget.Material.ActionBar">
+    </style>
 </resources>
